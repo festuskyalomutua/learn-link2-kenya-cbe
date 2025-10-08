@@ -1,0 +1,25 @@
+Step 8: Getting Started
+# Clone and setup
+git clone your-repo-url
+cd learn-link-kenya-cbe-fullstack
+
+# Install all dependencies
+npm run install-deps
+
+# Start development servers
+npm run dev
+
+This will give you:
+
+Frontend: React app running on http://localhost:3000
+Backend: Node.js API running on http://localhost:5000
+Database: MongoDB for data persistence
+Authentication: JWT-based user management
+Real-time updates: Live data synchronization
+The platform now has:
+✅ User authentication and role management
+✅ Real database storage
+✅ RESTful API endpoints
+✅ Modern React components
+✅ Responsive design
+✅ Production-ready architecture

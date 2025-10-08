@@ -1,0 +1,6 @@
+Advanced Features Implementation
+1. AI-Powered Recommendation Engine
+Install AI/ML dependencies:
+
+cd server
+npm install @tensorflow/tfjs-node natural compromise openai axios-retry brain.js

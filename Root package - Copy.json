@@ -1,0 +1,26 @@
+Root package.json:
+
+{
+  "name": "learn-link-kenya-cbe-fullstack",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "install-deps": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
+{
+  "dependencies": {
+    "react-dropzone": "^14.2.3",
+    "chart.js": "^4.4.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-hot-toast": "^2.4.1",
+    "date-fns": "^2.30.0",
+    "framer-motion": "^10.16.4",
+    "react-query": "^3.39.3"
+  }
+}

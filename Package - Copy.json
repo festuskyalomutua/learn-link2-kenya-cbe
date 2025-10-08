@@ -1,0 +1,25 @@
+Package.json Scripts
+server/package.json (add to scripts):
+
+{
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed": "node scripts/seedData.js"
+  }
+}
+{
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^4.10.0",
+    "natural": "^6.5.0",
+    "compromise": "^14.10.0",
+    "brain.js": "^2.0.0-beta.2",
+    "openai": "^4.0.0",
+    "pdfkit": "^0.13.0",
+    "exceljs": "^4.3.0",
+    "xml2js": "^0.6.2",
+    "canvas": "^2.11.2",
+    "chart.js": "^4.4.0",
+    "axios-retry": "^3.8.0"
+  }
+}

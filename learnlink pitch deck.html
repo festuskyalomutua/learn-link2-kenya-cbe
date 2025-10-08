@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnLink - CBE Platform Pitch Deck</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        /* Slide Animations */
+        .slide-enter {
+            opacity: 0;
+            transform: translateX(100px);
+            animation: slideIn 0.8s ease-out forwards;
+        }
+        
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        .scale-in {
+            transform: scale(0.8);
+            opacity: 0;
+            animation: scaleIn 0.6s ease-out forwards;
+        }
+        
+        @keyframes scaleIn {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Floating Animation */
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Gradient Backgrounds */
+        .gradient-bg-1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-bg-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .gradient-bg-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .gradient-bg-4 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .gradient-bg-5 {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        /* Progress Bar Animation */
+        .progress-bar {
+            width: 0%;
+            animation: progressFill 2s ease-out forwards;
+        }
+        
+        @keyframes progressFill {
+            to { width: var(--progress-width); }
+        }
+        
+        /* Pulse Animation */
+        .pulse-slow {
+            animation: pulse 3s infinite;
+        }
+        
+        /* Slide Navigation */
+        .slide-nav {
+            transition: all 0.3s ease;
+        }
+        
+        .slide-nav:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+        
+        /* Typewriter Effect */
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid #667eea;
+            white-space: nowrap;
+            animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #667eea; }
+        }
+        
+        /* Slide Transitions */
+        .slide-transition {
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+        }
+        
+        .slide-hidden {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        
+        .slide-visible {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white overflow-hidden">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { 
+            ChevronLeft, ChevronRight, Play, Pause, RotateCcw,
+            GraduationCap, Users, TrendingUp, Award, Zap, Shield,
+            Globe, Smartphone, Brain, Target, BookOpen, BarChart3,
+            DollarSign, Calendar, CheckCircle, ArrowRight, Star,
+            Lightbulb, Rocket, Heart, Eye, MessageSquare, Share2
+        } = lucide;
+
+        const PitchDeck = () => {
+            const [currentSlide, setCurrentSlide] = useState(0);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [slideProgress, setSlideProgress] = useState(0);
+            const intervalRef = useRef(null);
+
+            const slides = [
+                { id: 'title', component: TitleSlide },
+                { id: 'problem', component: ProblemSlide },
+                { id: 'solution', component: SolutionSlide },
+                { id: 'market', component: MarketSlide },
+                { id: 'product', component: ProductSlide },
+                { id: 'features', component: FeaturesSlide },
+                { id: 'demo', component: DemoSlide },
+                { id: 'business', component: BusinessModelSlide },
+                { id: 'competition', component: CompetitionSlide },
+                { id: 'traction', component: TractionSlide },
+                { id: 'team', component: TeamSlide },
+                { id: 'financials', component: FinancialsSlide },
+                { id: 'funding', component: FundingSlide },
+                { id: 'roadmap', component: RoadmapSlide },
+                { id: 'closing', component: ClosingSlide }
+            ];
+
+            useEffect(() => {
+                if (isPlaying) {
+                    intervalRef.current = setInterval(() => {
+                        setSlideProgress(prev => {
+                            if (prev >= 100) {
+                                nextSlide();
+                                return 0;
+                            }
+                            return prev + 2;
+                        });
+                    }, 100);
+                } else {
+                    clearInterval(intervalRef.current);
+                }
+
+                return () => clearInterval(intervalRef.current);
+            }, [isPlaying, currentSlide]);
+
+            const nextSlide = () => {
+                setCurrentSlide(prev => (prev + 1) % slides.length);
+                setSlideProgress(0);
+            };
+
+            const prevSlide = () => {
+                setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
+                setSlideProgress(0);
+            };
+
+            const goToSlide = (index) => {
+                setCurrentSlide(index);
+                setSlideProgress(0);
+            };
+
+            const togglePlayback = () => {
+                setIsPlaying(!isPlaying);
+            };
+
+            const resetPresentation = () => {
+                setCurrentSlide(0);
+                setSlideProgress(0);
+                setIsPlaying(false);
+            };
+
+            const CurrentSlideComponent = slides[currentSlide].component;
+
+            return (
+                <div className="h-screen flex flex-col">
+                    {/* Progress Bar */}
+                    <div className="h-1 bg-gray-800">
+                        <div 
+                            className="h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-100"
+                            style={{ width: `${((currentSlide / slides.length) * 100) + (slideProgress / slides.length)}%` }}
+                        ></div>
+                    </div>
+
+                    {/* Main Slide Area */}
+                    <div className="flex-1 relative overflow-hidden">
+                        <CurrentSlideComponent />
+                    </div>
+
+                    {/* Navigation Controls */}
+                    <div className="bg-gray-800 p-4 flex items-center justify-between">
+                        {/* Slide Navigation */}
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={prevSlide}
+                                className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={nextSlide}
+                                className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                            >
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Slide Indicators */}
+                        <div className="flex space-x-2">
+                            {slides.map((slide, index) => (
+                                <button
+                                    key={slide.id}
+                                    onClick={() => goToSlide(index)}
+                                    className={`w-3 h-3 rounded-full transition-all slide-nav ${
+                                        index === currentSlide 
+                                            ? 'bg-blue-500 scale-125' 
+                                            : 'bg-gray-600 hover:bg-gray-500'
+                                    }`}
+                                    title={`Slide ${index + 1}`}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Playback Controls */}
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={togglePlayback}
+                                className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                            >
+                                {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                            </button>
+                            <button
+                                onClick={resetPresentation}
+                                className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                            >
+                                <RotateCcw className="w-5 h-5" />
+                            </button>
+                            <span className="text-sm text-gray-400">
+                                {currentSlide + 1} / {slides.length}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Slide Components
+        const TitleSlide = () => (
+            <div className="gradient-bg-1 h-full flex items-center justify-center relative overflow-hidden">
+                {/* Background Elements */}
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-20 left-20 w-32 h-32 bg-white rounded-full float"></div>
+                    <div className="absolute bottom-20 right-20 w-24 h-24 bg-white rounded-full float" style={{animationDelay: '1s'}}></div>
+                    <div className="absolute top-1/2 left-10 w-16 h-16 bg-white rounded-full float" style={{animationDelay: '2s'}}></div>
+                </div>
+
+                <div className="text-center z-10 max-w-4xl mx-auto px-8">
+                    <div className="scale-in">
+                        <GraduationCap className="w-24 h-24 mx-auto mb-8 text-white" />
+                    </div>
+                    
+                    <h1 className="text-7xl font-bold mb-6 slide-enter">
+                        <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                            LearnLink
+                        </span>
+                    </h1>
+                    
+                    <p className="text-2xl mb-8 text-blue-100 slide-enter" style={{animationDelay: '0.3s'}}>
+                        Revolutionizing Education with Competency-Based Learning
+                    </p>
+                    
+                    <div className="flex items-center justify-center space-x-8 slide-enter" style={{animationDelay: '0.6s'}}>
+                        <div className="flex items-center space-x-2">
+                            <Brain className="w-6 h-6" />
+                            <span>AI-Powered</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Smartphone className="w-6 h-6" />
+                            <span>Mobile-First</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Shield className="w-6 h-6" />
+                            <span>Secure</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-12 slide-enter" style={{animationDelay: '0.9s'}}>
+                        <p className="text-lg text-blue-200">
+                            Empowering educators and students with personalized, competency-based learning experiences
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const ProblemSlide = () => (
+            <div className="gradient-bg-2 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter">The Problem</h2>
+                        <p className="text-xl text-pink-100 slide-enter" style={{animationDelay: '0.2s'}}>
+                            Traditional education systems are failing to meet modern learning needs
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-6">
+                            {[
+                                { icon: TrendingUp, title: "One-Size-Fits-All Approach", desc: "85% of students learn at different paces, but traditional systems treat everyone the same" },
+                                { icon: Target, title: "Lack of Personalization", desc: "Students receive generic content that doesn't match their individual learning styles or competency levels" },
+                                { icon: BarChart3, title: "Poor Progress Tracking", desc: "Educators struggle to track individual student progress and identify learning gaps effectively" }
+                            ].map((item, index) => (
+                                <div key={index} className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-6 slide-enter" style={{animationDelay: `${0.4 + index * 0.2}s`}}>
+                                    <item.icon className="w-12 h-12 mb-4 text-pink-200" />
+                                    <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                                    <p className="text-pink-100">{item.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex items-center justify-center">
+                            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '1s'}}>
+                                <div className="text-center">
+                                    <div className="text-6xl font-bold text-yellow-300 mb-4">73%</div>
+                                    <p className="text-lg mb-6">of students feel disengaged with traditional learning methods</p>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center">
+                                            <span>Student Engagement</span>
+                                            <span className="text-red-300">27%</span>
+                                        </div>
+                                        <div className="w-full bg-gray-700 rounded-full h-3">
+                                            <div className="progress-bar bg-red-500 h-3 rounded-full" style={{'--progress-width': '27%'}}></div>
+                                        </div>
+                                        
+                                        <div className="flex justify-between items-center">
+                                            <span>Learning Effectiveness</span>
+                                            <span className="text-orange-300">34%</span>
+                                        </div>
+                                        <div className="w-full bg-gray-700 rounded-full h-3">
+                                            <div className="progress-bar bg-orange-500 h-3 rounded-full" style={{'--progress-width': '34%'}}></div>
+                                        </div>
+                                        
+                                        <div className="flex justify-between items-center">
+                                            <span>Teacher Satisfaction</span>
+                                            <span className="text-yellow-300">41%</span>
+                                        </div>
+                                        <div className="w-full bg-gray-700 rounded-full h-3">
+                                            <div className="progress-bar bg-yellow-500 h-3 rounded-full" style={{'--progress-width': '41%'}}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const SolutionSlide = () => (
+            <div className="gradient-bg-3 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter">Our Solution</h2>
+                        <p className="text-xl text-blue-100 slide-enter" style={{animationDelay: '0.2s'}}>
+                            LearnLink: The Future of Competency-Based Education
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <div className="space-y-8">
+                            {[
+                                { 
+                                    icon: Brain, 
+                                    title: "AI-Powered Personalization", 
+                                    desc: "Machine learning algorithms adapt content and pacing to each student's unique learning profile",
+                                    color: "text-purple-300"
+                                },
+                                { 
+                                    icon: Target, 
+                                    title: "Competency-Based Learning", 
+                                    desc: "Students progress based on mastery, not time, ensuring deep understanding of concepts",
+                                    color: "text-green-300"
+                                },
+                                { 
+                                    icon: BarChart3, 
+                                    title: "Real-Time Analytics", 
+                                    desc: "Comprehensive dashboards provide instant insights into student progress and learning gaps",
+                                    color: "text-yellow-300"
+                                },
+                                { 
+                                    icon: Smartphone, 
+                                    title: "Mobile-First Design", 
+                                    desc: "Seamless learning experience across all devices with offline capabilities",
+                                    color: "text-pink-300"
+                                }
+                            ].map((item, index) => (
+                                <div key={index} className="flex items-start space-x-4 slide-enter" style={{animationDelay: `${0.4 + index * 0.2}s`}}>
+                                    <div className={`p-3 bg-white bg-opacity-20 rounded-lg ${item.color}`}>
+                                        <item.icon className="w-8 h-8" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                                        <p className="text-blue-100">{item.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="relative">
+                            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '1.2s'}}>
+                                <div className="text-center mb-6">
+                                    <Rocket className="w-16 h-16 mx-auto mb-4 text-cyan-300" />
+                                    <h3 className="text-2xl font-bold mb-2">Impact Results</h3>
+                                </div>
+                                
+                                <div className="space-y-6">
+                                    <div className="text-center">
+                                        <div className="text-4xl font-bold text-green-300 mb-2">+127%</div>
+                                        <p className="text-sm text-blue-100">Student Engagement Increase</p>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4 text-center">
+                                        <div>
+                                            <div className="text-2xl font-bold text-yellow-300">89%</div>
+                                            <p className="text-xs text-blue-100">Learning Retention</p>
+                                        </div>
+                                        <div>
+                                            <div className="text-2xl font-bold text-purple-300">94%</div>
+                                            <p className="text-xs text-blue-100">Teacher Satisfaction</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="text-center">
+                                        <div className="text-3xl font-bold text-pink-300 mb-2">-45%</div>
+                                        <p className="text-sm text-blue-100">Time to Competency Mastery</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const MarketSlide = () => (
+            <div className="gradient-bg-4 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter text-gray-800">Market Opportunity</h2>
+                        <p className="text-xl text-green-800 slide-enter" style={{animationDelay: '0.2s'}}>
+                            A massive and rapidly growing global education technology market
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Market Size */}
+                        <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 text-center scale-in" style={{animationDelay: '0.4s'}}>
+                            <Globe className="w-16 h-16 mx-auto mb-4 text-green-700" />
+                            <div className="text-4xl font-bold text-gray-800 mb-2">$404B</div>
+                            <p className="text-lg font-semibold text-green-800 mb-2">Global EdTech Market</p>
+                            <p className="text-sm text-green-700">Expected to reach $605B by 2027</p>
+                            <div className="mt-4 text-2xl font-bold text-green-600">+15.2% CAGR</div>
+                        </div>
+
+                        {/* Target Segments */}
+                        <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '0.6s'}}>
+                            <Users className="w-16 h-16 mx-auto mb-4 text-green-700" />
+                            <h3 className="text-2xl font-bold text-gray-800 mb-4">Target Segments</h3>
+                            <div className="space-y-3 text-left">
+                                <div className="flex justify-between">
+                                    <span className="text-green-800">K-12 Schools</span>
+                                    <span className="font-bold text-gray-800">$89B</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-green-800">Higher Education</span>
+                                    <span className="font-bold text-gray-800">$67B</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-green-800">Corporate Training</span>
+                                    <span className="font-bold text-gray-800">$45B</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-green-800">Online Learning</span>
+                                    <span className="font-bold text-gray-800">$78B</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Growth Drivers */}
+                        <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '0.8s'}}>
+                            <TrendingUp className="w-16 h-16 mx-auto mb-4 text-green-700" />
+                            <h3 className="text-2xl font-bold text-gray-800 mb-4">Growth Drivers</h3>
+                            <div className="space-y-3 text-left">
+                                {[
+                                    "Digital transformation in education",
+                                    "Demand for personalized learning",
+                                    "Remote/hybrid learning adoption",
+                                    "Skills-based hiring trends",
+                                    "Government education initiatives"
+                                ].map((driver, index) => (
+                                    <div key={index} className="flex items-center space-x-2">
+                                        <CheckCircle className="w-4 h-4 text-green-600" />
+                                        <span className="text-sm text-green-800">{driver}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Market Penetration Strategy */}
+                    <div className="mt-12 bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 slide-enter" style={{animationDelay: '1s'}}>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Our Market Penetration Strategy</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            {[
+                                { phase: "Phase 1", target: "K-12 Private Schools", timeline: "0-12 months", market: "$15B" },
+                                { phase: "Phase 2", target: "Public School Districts", timeline: "12-24 months", market: "$45B" },
+                                { phase: "Phase 3", target: "Higher Education", timeline: "24-36 months", market: "$67B" },
+                                { phase: "Phase 4", target: "Corporate Training", timeline: "36+ months", market: "$45B" }
+                            ].map((phase, index) => (
+                                <div key={index} className="text-center">
+                                    <div className="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3 font-bold">
+                                        {index + 1}
+                                    </div>
+                                    <h4 className="font-bold text-gray-800 mb-1">{phase.phase}</h4>
+                                    <p className="text-sm text-green-800 mb-1">{phase.target}</p>
+                                    <p className="text-xs text-green-700 mb-1">{phase.timeline}</p>
+                                    <p className="text-sm font-bold text-gray-800">{phase.market}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const ProductSlide = () => (
+            <div className="gradient-bg-5 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter text-gray-800">Product Overview</h2>
+                        <p className="text-xl text-pink-800 slide-enter" style={{animationDelay: '0.2s'}}>
+                            A comprehensive platform designed for modern education needs
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* Product Architecture */}
+                        <div className="space-y-6">
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 slide-enter" style={{animationDelay: '0.4s'}}>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                                    <Lightbulb className="w-8 h-8 mr-3 text-yellow-600" />
+                                    Core Platform
+                                </h3>
+                                <div className="space-y-3">
+                                    {[
+                                        "Competency Management System",
+                                        "Assessment Builder & Engine",
+                                        "Learning Analytics Dashboard",
+                                        "Student Progress Tracking",
+                                        "Curriculum Alignment Tools"
+                                    ].map((feature, index) => (
+                                        <div key={index} className="flex items-center space-x-3">
+                                            <CheckCircle className="w-5 h-5 text-green-600" />
+                                            <span className="text-gray-800">{feature}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 slide-enter" style={{animationDelay: '0.6s'}}>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                                    <Brain className="w-8 h-8 mr-3 text-purple-600" />
+                                    AI Features
+                                </h3>
+                                <div className="space-y-3">
+                                    {[
+                                        "Personalized Learning Paths",
+                                        "Predictive Analytics",
+                                        "Automated Content Recommendations",
+                                        "Intelligent Tutoring System",
+                                        "Natural Language Processing"
+                                    ].map((feature, index) => (
+                                        <div key={index} className="flex items-center space-x-3">
+                                            <Star className="w-5 h-5 text-yellow-500" />
+                                            <span className="text-gray-800">{feature}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Product Demo Mockup */}
+                        <div className="relative">
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '0.8s'}}>
+                                <div className="bg-gray-800 rounded-lg p-4 mb-6">
+                                    <div className="flex items-center space-x-2 mb-4">
+                                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="bg-blue-600 text-white p-3 rounded text-center">
+                                            <h4 className="font-bold">Student Dashboard</h4>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="bg-green-500 text-white p-2 rounded text-xs text-center">
+                                                Math: 85%
+                                            </div>
+                                            <div className="bg-yellow-500 text-white p-2 rounded text-xs text-center">
+                                                Science: 72%
+                                            </div>
+                                        </div>
+                                        <div className="bg-purple-600 text-white p-2 rounded text-xs text-center">
+                                            Next: Problem Solving Assessment
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-gray-800 font-medium">User Satisfaction</span>
+                                        <span className="text-2xl font-bold text-green-600">96%</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-gray-800 font-medium">Learning Efficiency</span>
+                                        <span className="text-2xl font-bold text-blue-600">+78%</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-gray-800 font-medium">Time Saved</span>
+                                        <span className="text-2xl font-bold text-purple-600">40hrs/week</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Floating Elements */}
+                            <div className="absolute -top-4 -right-4 bg-yellow-400 text-gray-800 p-3 rounded-full float">
+                                <Award className="w-6 h-6" />
+                            </div>
+                            <div className="absolute -bottom-4 -left-4 bg-green-400 text-gray-800 p-3 rounded-full float" style={{animationDelay: '1s'}}>
+                                <Target className="w-6 h-6" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const FeaturesSlide = () => (
+            <div className="gradient-bg-1 h-full flex items-center justify-center p-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter">Key Features</h2>
+                        <p className="text-xl text-blue-100 slide-enter" style={{animationDelay: '0.2s'}}>
+                            Comprehensive tools for modern education
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[
+                            {
+                                icon: Brain,
+                                title: "AI-Powered Recommendations",
+                                description: "Machine learning algorithms provide personalized learning paths and content suggestions",
+                                color: "bg-purple-500"
+                            },
+                            {
+                                icon: BarChart3,
+                                title: "Advanced Analytics",
+                                description: "Real-time insights into student progress, learning patterns, and performance metrics",
+                                color: "bg-blue-500"
+                            },
+                            {
+                                icon: Smartphone,
+                                title: "Mobile-First Design",
+                                description: "Seamless experience across all devices with offline capabilities and PWA support",
+                                color: "bg-green-500"
+                            },
+                            {
+                                icon: Shield,
+                                title: "Enterprise Security",
+                                description: "Bank-level security with biometric authentication and data encryption",
+                                color: "bg-red-500"
+                            },
+                            {
+                                icon: Globe,
+                                title: "System Integrations",
+                                description: "Connect with Google Classroom, Canvas, Moodle, and other educational platforms",
+                                color: "bg-yellow-500"
+                            },
+                            {
+                                icon: Target,
+                                title: "Competency Tracking",
+                                description: "Detailed competency mapping and progress tracking with mastery-based advancement",
+                                color: "bg-pink-500"
+                            }
+                        ].map((feature, index) => (
+                            <div 
+                                key={index} 
+                                className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 hover:bg-opacity-20 transition-all duration-300 scale-in"
+                                style={{animationDelay: `${0.4 + index * 0.1}s`}}
+                            >
+                                <div className={`${feature.color} p-4 rounded-xl w-fit mb-4`}>
+                                    <feature.icon className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                                <p className="text-blue-100">{feature.description}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-12 text-center slide-enter" style={{animationDelay: '1s'}}>
+                        <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 inline-block">
+                            <h3 className="text-2xl font-bold mb-4">Platform Statistics</h3>
+                            <div className="grid grid-cols-3 gap-8">
+                                <div>
+                                    <div className="text-3xl font-bold text-yellow-300">50+</div>
+                                    <p className="text-blue-100">Features</p>
+                                </div>
+                                <div>
+                                    <div className="text-3xl font-bold text-green-300">99.9%</div>
+                                    <p className="text-blue-100">Uptime</p>
+                                </div>
+                                <div>
+                                    <div className="text-3xl font-bold text-pink-300">24/7</div>
+                                    <p className="text-blue-100">Support</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const DemoSlide = () => (
+            <div className="gradient-bg-3 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter text-gray-800">Live Demo</h2>
+                        <p className="text-xl text-blue-800 slide-enter" style={{animationDelay: '0.2s'}}>
+                            Experience LearnLink in action
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* Demo Interface */}
+                        <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '0.4s'}}>
+                            <div className="bg-gray-900 rounded-lg p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-white font-bold text-lg">Student Dashboard</h3>
+                                    <div className="flex space-x-2">
+                                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="bg-blue-600 p-4 rounded-lg">
+                                        <h4 className="text-white font-semibold mb-2">Current Progress</h4>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-white text-sm">
+                                                <span>Mathematics</span>
+                                                <span>Level 3/4</span>
+                                            </div>
+                                            <div className="w-full bg-blue-800 rounded-full h-2">
+                                                <div className="progress-bar bg-yellow-400 h-2 rounded-full" style={{'--progress-width': '75%'}}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-green-600 p-3 rounded-lg text-center">
+                                            <div className="text-white font-bold text-lg">12</div>
+                                            <div className="text-green-100 text-sm">Completed</div>
+                                        </div>
+                                        <div className="bg-orange-600 p-3 rounded-lg text-center">
+                                            <div className="text-white font-bold text-lg">3</div>
+                                            <div className="text-orange-100 text-sm">In Progress</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-purple-600 p-4 rounded-lg">
+                                        <h4 className="text-white font-semibold mb-2">AI Recommendation</h4>
+                                        <p className="text-purple-100 text-sm">
+                                            Focus on Problem Solving competency. Estimated time to mastery: 2 weeks.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Demo Features */}
+                        <div className="space-y-6">
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 slide-enter" style={{animationDelay: '0.6s'}}>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4">Demo Highlights</h3>
+                                <div className="space-y-4">
+                                    {[
+                                        { icon: Eye, text: "Real-time progress visualization" },
+                                        { icon: Brain, text: "AI-powered learning recommendations" },
+                                        { icon: Target, text: "Competency-based progression" },
+                                        { icon: BarChart3, text: "Advanced analytics dashboard" }
+                                    ].map((item, index) => (
+                                        <div key={index} className="flex items-center space-x-3">
+                                            <item.icon className="w-6 h-6 text-blue-600" />
+                                            <span className="text-gray-800">{item.text}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 slide-enter" style={{animationDelay: '0.8s'}}>
+                                <h3 className="text-xl font-bold text-gray-800 mb-4">User Feedback</h3>
+                                <div className="space-y-3">
+                                    <div className="bg-white bg-opacity-30 p-3 rounded-lg">
+                                        <p className="text-sm text-gray-800 italic">"LearnLink transformed how our students learn. Engagement increased by 150%!"</p>
+                                        <p className="text-xs text-gray-700 mt-1">- Sarah Johnson, Principal</p>
+                                    </div>
+                                    <div className="bg-white bg-opacity-30 p-3 rounded-lg">
+                                        <p className="text-sm text-gray-800 italic">"The AI recommendations are incredibly accurate. Students love the personalized approach."</p>
+                                        <p className="text-xs text-gray-700 mt-1">- Mike Chen, Teacher</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="text-center slide-enter" style={{animationDelay: '1s'}}>
+                                <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                                    Request Live Demo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const BusinessModelSlide = () => (
+            <div className="gradient-bg-4 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter text-gray-800">Business Model</h2>
+                        <p className="text-xl text-green-800 slide-enter" style={{animationDelay: '0.2s'}}>
+                            Multiple revenue streams for sustainable growth
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* Revenue Streams */}
+                        <div className="space-y-6">
+                            {[
+                                {
+                                    title: "SaaS Subscriptions",
+                                    description: "Monthly/annual subscriptions per student or institution",
+                                    revenue: "$50-200/student/year",
+                                    percentage: "60%",
+                                    color: "bg-blue-500"
+                                },
+                                {
+                                    title: "Professional Services",
+                                    description: "Implementation, training, and customization services",
+                                    revenue: "$10K-100K/project",
+                                    percentage: "25%",
+                                    color: "bg-green-500"
+                                },
+                                {
+                                    title: "Premium Features",
+                                    description: "Advanced AI analytics, custom integrations, white-labeling",
+                                    revenue: "$5-50/user/month",
+                                    percentage: "10%",
+                                    color: "bg-purple-500"
+                                },
+                                {
+                                    title: "Marketplace",
+                                    description: "Third-party content and assessment marketplace",
+                                    revenue: "15% commission",
+                                    percentage: "5%",
+                                    color: "bg-orange-500"
+                                }
+                            ].map((stream, index) => (
+                                <div 
+                                    key={index} 
+                                    className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 slide-enter"
+                                    style={{animationDelay: `${0.4 + index * 0.1}s`}}
+                                >
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="text-xl font-bold text-gray-800">{stream.title}</h3>
+                                        <div className={`${stream.color} text-white px-3 py-1 rounded-full text-sm font-bold`}>
+                                            {stream.percentage}
+                                        </div>
+                                    </div>
+                                    <p className="text-green-800 mb-2">{stream.description}</p>
+                                    <p className="text-lg font-semibold text-gray-800">{stream.revenue}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Financial Projections */}
+                        <div className="space-y-6">
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 scale-in" style={{animationDelay: '0.8s'}}>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-6">5-Year Financial Projection</h3>
+                                <div className="space-y-4">
+                                    {[
+                                        { year: "Year 1", revenue: "$2.5M", customers: "500 schools", growth: "Launch" },
+                                        { year: "Year 2", revenue: "$8.2M", customers: "1,500 schools", growth: "+228%" },
+                                        { year: "Year 3", revenue: "$24.7M", customers: "4,200 schools", growth: "+201%" },
+                                        { year: "Year 4", revenue: "$58.3M", customers: "8,900 schools", growth: "+136%" },
+                                        { year: "Year 5", revenue: "$127.8M", customers: "16,800 schools", growth: "+119%" }
+                                    ].map((projection, index) => (
+                                        <div key={index} className="flex items-center justify-between p-3 bg-white bg-opacity-30 rounded-lg">
+                                            <div>
+                                                <div className="font-bold text-gray-800">{projection.year}</div>
+                                                <div className="text-sm text-green-800">{projection.customers}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-xl font-bold text-gray-800">{projection.revenue}</div>
+                                                <div className="text-sm text-green-600">{projection.growth}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 scale-in" style={{animationDelay: '1s'}}>
+                                <h3 className="text-xl font-bold text-gray-800 mb-4">Key Metrics</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-green-600">$127.8M</div>
+                                        <p className="text-sm text-green-800">ARR by Year 5</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-blue-600">16.8K</div>
+                                        <p className="text-sm text-green-800">Schools by Year 5</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-purple-600">92%</div>
+                                        <p className="text-sm text-green-800">Gross Margin</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-orange-600">5%</div>
+                                        <p className="text-sm text-green-800">Monthly Churn</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const CompetitionSlide = () => (
+            <div className="gradient-bg-2 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter">Competitive Landscape</h2>
+                        <p className="text-xl text-pink-100 slide-enter" style={{animationDelay: '0.2s'}}>
+                            How LearnLink stands out in the market
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* Competitive Matrix */}
+                        <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '0.4s'}}>
+                            <h3 className="text-2xl font-bold mb-6">Competitive Comparison</h3>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="border-b border-pink-300">
+                                            <th className="text-left py-2">Feature</th>
+                                            <th className="text-center py-2">LearnLink</th>
+                                            <th className="text-center py-2">Canvas</th>
+                                            <th className="text-center py-2">Blackboard</th>
+                                            <th className="text-center py-2">Google Classroom</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="space-y-2">
+                                        {[
+                                            { feature: "CBE Support", learnlink: "✓", canvas: "Limited", blackboard: "✗", google: "✗" },
+                                            { feature: "AI Recommendations", learnlink: "✓", canvas: "✗", blackboard: "✗", google: "✗" },
+                                            { feature: "Mobile-First", learnlink: "✓", canvas: "Limited", blackboard: "Limited", google: "✓" },
+                                            { feature: "Real-time Analytics", learnlink: "✓", canvas: "Basic", blackboard: "Basic", google: "Basic" },
+                                            { feature: "Offline Support", learnlink: "✓", canvas: "✗", blackboard: "✗", google: "Limited" },
+                                            { feature: "Pricing", learnlink: "$50/student", canvas: "$120/student", blackboard: "$150/student", google: "Free/Limited" }
+                                        ].map((row, index) => (
+                                            <tr key={index} className="border-b border-pink-200">
+                                                <td className="py-2 font-medium">{row.feature}</td>
+                                                <td className="text-center py-2 text-green-300 font-bold">{row.learnlink}</td>
+                                                <td className="text-center py-2">{row.canvas}</td>
+                                                <td className="text-center py-2">{row.blackboard}</td>
+                                                <td className="text-center py-2">{row.google}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Competitive Advantages */}
+                        <div className="space-y-6">
+                            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-6 slide-enter" style={{animationDelay: '0.6s'}}>
+                                <h3 className="text-2xl font-bold mb-4">Our Competitive Advantages</h3>
+                                <div className="space-y-4">
+                                    {[
+                                        {
+                                            icon: Brain,
+                                            title: "AI-First Approach",
+                                            description: "Built from ground up with AI at the core, not as an add-on"
+                                        },
+                                        {
+                                            icon: Target,
+                                            title: "True CBE Focus",
+                                            description: "Designed specifically for competency-based education, not adapted from traditional LMS"
+                                        },
+                                        {
+                                            icon: Smartphone,
+                                            title: "Mobile-Native",
+                                            description: "Mobile-first design with full offline capabilities"
+                                        },
+                                        {
+                                            icon: Zap,
+                                            title: "Modern Architecture",
+                                            description: "Cloud-native, scalable, and built with latest technologies"
+                                        }
+                                    ].map((advantage, index) => (
+                                        <div key={index} className="flex items-start space-x-3">
+                                            <advantage.icon className="w-6 h-6 text-pink-300 mt-1" />
+                                            <div>
+                                                <h4 className="font-semibold mb-1">{advantage.title}</h4>
+                                                <p className="text-sm text-pink-100">{advantage.description}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-6 slide-enter" style={{animationDelay: '0.8s'}}>
+                                <h3 className="text-xl font-bold mb-4">Market Position</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span>Innovation Score</span>
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-24 bg-pink-800 rounded-full h-2">
+                                                <div className="progress-bar bg-pink-300 h-2 rounded-full" style={{'--progress-width': '95%'}}></div>
+                                            </div>
+                                            <span className="text-sm">95%</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span>User Experience</span>
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-24 bg-pink-800 rounded-full h-2">
+                                                <div className="progress-bar bg-pink-300 h-2 rounded-full" style={{'--progress-width': '92%'}}></div>
+                                            </div>
+                                            <span className="text-sm">92%</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span>Value for Money</span>
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-24 bg-pink-800 rounded-full h-2">
+                                                <div className="progress-bar bg-pink-300 h-2 rounded-full" style={{'--progress-width': '88%'}}></div>
+                                            </div>
+                                            <span className="text-sm">88%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const TractionSlide = () => (
+            <div className="gradient-bg-5 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter text-gray-800">Traction & Growth</h2>
+                        <p className="text-xl text-pink-800 slide-enter" style={{animationDelay: '0.2s'}}>
+                            Strong momentum and proven market validation
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Key Metrics */}
+                        <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '0.4s'}}>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-6">Key Metrics</h3>
+                            <div className="space-y-6">
+                                <div className="text-center">
+                                    <div className="text-4xl font-bold text-blue-600 mb-2">2,847</div>
+                                    <p className="text-gray-800">Active Schools</p>
+                                    <p className="text-sm text-pink-600">+156% MoM Growth</p>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-4xl font-bold text-green-600 mb-2">847K</div>
+                                    <p className="text-gray-800">Students</p>
+                                    <p className="text-sm text-pink-600">+203% YoY Growth</p>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-4xl font-bold text-purple-600 mb-2">$12.4M</div>
+                                    <p className="text-gray-800">ARR</p>
+                                    <p className="text-sm text-pink-600">+289% YoY Growth</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Customer Success */}
+                        <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '0.6s'}}>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-6">Customer Success</h3>
+                            <div className="space-y-4">
+                                <div className="bg-white bg-opacity-30 p-4 rounded-lg">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="font-semibold text-gray-800">Customer Satisfaction</span>
+                                        <span className="text-2xl font-bold text-green-600">4.8/5</span>
+                                    </div>
+                                    <div className="w-full bg-gray-300 rounded-full h-2">
+                                        <div className="progress-bar bg-green-500 h-2 rounded-full" style={{'--progress-width': '96%'}}></div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white bg-opacity-30 p-4 rounded-lg">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="font-semibold text-gray-800">Net Promoter Score</span>
+                                        <span className="text-2xl font-bold text-blue-600">73</span>
+                                    </div>
+                                    <div className="w-full bg-gray-300 rounded-full h-2">
+                                        <div className="progress-bar bg-blue-500 h-2 rounded-full" style={{'--progress-width': '73%'}}></div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white bg-opacity-30 p-4 rounded-lg">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="font-semibold text-gray-800">Customer Retention</span>
+                                        <span className="text-2xl font-bold text-purple-600">94%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-300 rounded-full h-2">
+                                        <div className="progress-bar bg-purple-500 h-2 rounded-full" style={{'--progress-width': '94%'}}></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Partnerships & Recognition */}
+                        <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '0.8s'}}>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-6">Recognition</h3>
+                            <div className="space-y-4">
+                                <div className="bg-white bg-opacity-30 p-3 rounded-lg">
+                                    <div className="flex items-center space-x-3">
+                                        <Award className="w-6 h-6 text-yellow-600" />
+                                        <div>
+                                            <p className="font-semibold text-gray-800">EdTech Breakthrough Award</p>
+                                            <p className="text-sm text-gray-700">Best CBE Platform 2024</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white bg-opacity-30 p-3 rounded-lg">
+                                    <div className="flex items-center space-x-3">
+                                        <Star className="w-6 h-6 text-blue-600" />
+                                        <div>
+                                            <p className="font-semibold text-gray-800">Gartner Cool Vendor</p>
+                                            <p className="text-sm text-gray-700">Education Technology 2024</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white bg-opacity-30 p-3 rounded-lg">
+                                    <div className="flex items-center space-x-3">
+                                        <Rocket className="w-6 h-6 text-green-600" />
+                                        <div>
+                                            <p className="font-semibold text-gray-800">Fast Company</p>
+                                            <p className="text-sm text-gray-700">Most Innovative EdTech</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white bg-opacity-30 p-3 rounded-lg">
+                                    <div className="flex items-center space-x-3">
+                                        <Heart className="w-6 h-6 text-red-600" />
+                                        <div>
+                                            <p className="font-semibold text-gray-800">Product Hunt</p>
+                                            <p className="text-sm text-gray-700">#1 Product of the Day</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Growth Chart */}
+                    <div className="mt-12 bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 slide-enter" style={{animationDelay: '1s'}}>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Revenue Growth Trajectory</h3>
+                        <div className="grid grid-cols-6 gap-4 items-end h-32">
+                            {[
+                                { month: "Jan", revenue: 20 },
+                                { month: "Feb", revenue: 35 },
+                                { month: "Mar", revenue: 55 },
+                                { month: "Apr", revenue: 78 },
+                                { month: "May", revenue: 95 },
+                                { month: "Jun", revenue: 100 }
+                            ].map((data, index) => (
+                                <div key={index} className="text-center">
+                                    <div 
+                                        className="bg-gradient-to-t from-pink-600 to-pink-400 rounded-t-lg mb-2 transition-all duration-1000"
+                                        style={{ 
+                                            height: `${data.revenue}%`,
+                                            animationDelay: `${1.2 + index * 0.1}s`
+                                        }}
+                                    ></div>
+                                    <p className="text-sm text-gray-800">{data.month}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const TeamSlide = () => (
+            <div className="gradient-bg-1 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter">Our Team</h2>
+                        <p className="text-xl text-blue-100 slide-enter" style={{animationDelay: '0.2s'}}>
+                            World-class team with deep expertise in education and technology
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[
+                            {
+                                name: "Sarah Johnson",
+                                role: "CEO & Co-Founder",
+                                background: "Former VP of Product at Coursera, 15+ years in EdTech",
+                                education: "MBA Stanford, MS Computer Science MIT",
+                                image: "👩‍💼"
+                            },
+                            {
+                                name: "Dr. Michael Chen",
+                                role: "CTO & Co-Founder",
+                                background: "Ex-Google AI Research, Built ML systems at scale",
+                                education: "PhD Computer Science Stanford",
+                                image: "👨‍💻"
+                            },
+                            {
+                                name: "Dr. Emily Rodriguez",
+                                role: "Chief Learning Officer",
+                                background: "Former Dean at Harvard Graduate School of Education",
+                                education: "PhD Education Psychology Harvard",
+                                image: "👩‍🎓"
+                            },
+                            {
+                                name: "David Kim",
+                                role: "VP of Engineering",
+                                background: "Ex-Netflix, Led engineering teams of 50+ developers",
+                                education: "MS Computer Science Carnegie Mellon",
+                                image: "👨‍🔧"
+                            },
+                            {
+                                name: "Lisa Thompson",
+                                role: "VP of Sales",
+                                background: "Former Salesforce, $100M+ in EdTech sales",
+                                education: "MBA Wharton",
+                                image: "👩‍💼"
+                            },
+                            {
+                                name: "James Wilson",
+                                role: "VP of Marketing",
+                                background: "Ex-HubSpot, Scaled marketing from $10M to $100M ARR",
+                                education: "MBA Northwestern Kellogg",
+                                image: "👨‍💼"
+                            }
+                        ].map((member, index) => (
+                            <div 
+                                key={index} 
+                                className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 text-center scale-in"
+                                style={{animationDelay: `${0.4 + index * 0.1}s`}}
+                            >
+                                <div className="text-6xl mb-4">{member.image}</div>
+                                <h3 className="text-xl font-bold mb-2">{member.name}</h3>
+                                <p className="text-blue-300 font-semibold mb-3">{member.role}</p>
+                                <p className="text-sm text-blue-100 mb-2">{member.background}</p>
+                                <p className="text-xs text-blue-200">{member.education}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Advisory Board */}
+                        <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 slide-enter" style={{animationDelay: '1s'}}>
+                            <h3 className="text-2xl font-bold mb-6">Advisory Board</h3>
+                            <div className="space-y-4">
+                                {[
+                                    { name: "Dr. John Smith", role: "Former CEO of Pearson Education" },
+                                    { name: "Maria Garcia", role: "Ex-VP of Product at Khan Academy" },
+                                    { name: "Robert Lee", role: "Former CTO of Blackboard" },
+                                    { name: "Dr. Jennifer Brown", role: "Education Policy Expert, US Dept. of Education" }
+                                ].map((advisor, index) => (
+                                    <div key={index} className="flex items-center space-x-3">
+                                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                            {advisor.name.split(' ').map(n => n[0]).join('')}
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold">{advisor.name}</p>
+                                            <p className="text-sm text-blue-100">{advisor.role}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Team Stats */}
+                        <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 slide-enter" style={{animationDelay: '1.2s'}}>
+                            <h3 className="text-2xl font-bold mb-6">Team Highlights</h3>
+                            <div className="space-y-6">
+                                <div className="text-center">
+                                    <div className="text-3xl font-bold text-yellow-300 mb-2">47</div>
+                                    <p className="text-blue-100">Team Members</p>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4 text-center">
+                                    <div>
+                                        <div className="text-2xl font-bold text-green-300">15+</div>
+                                        <p className="text-xs text-blue-100">Years Avg Experience</p>
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold text-purple-300">8</div>
+                                        <p className="text-xs text-blue-100">PhD Holders</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-pink-300 mb-2">$2.3B</div>
+                                    <p className="text-sm text-blue-100">Combined Previous Company Valuations</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const FinancialsSlide = () => (
+            <div className="gradient-bg-3 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter text-gray-800">Financial Projections</h2>
+                        <p className="text-xl text-blue-800 slide-enter" style={{animationDelay: '0.2s'}}>
+                            Strong unit economics and path to profitability
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* Revenue Projections */}
+                        <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '0.4s'}}>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-6">5-Year Revenue Forecast</h3>
+                            <div className="space-y-4">
+                                {[
+                                    { year: "2024", revenue: "$2.5M", growth: "Launch Year", margin: "65%" },
+                                    { year: "2025", revenue: "$8.2M", growth: "+228%", margin: "72%" },
+                                    { year: "2026", revenue: "$24.7M", growth: "+201%", margin: "78%" },
+                                    { year: "2027", revenue: "$58.3M", growth: "+136%", margin: "82%" },
+                                    { year: "2028", revenue: "$127.8M", growth: "+119%", margin: "85%" }
+                                ].map((data, index) => (
+                                    <div key={index} className="bg-white bg-opacity-30 p-4 rounded-lg">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <div className="font-bold text-gray-800 text-lg">{data.year}</div>
+                                                <div className="text-sm text-blue-800">{data.growth}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-xl font-bold text-gray-800">{data.revenue}</div>
+                                                <div className="text-sm text-green-600">{data.margin} margin</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Key Metrics */}
+                        <div className="space-y-6">
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 scale-in" style={{animationDelay: '0.6s'}}>
+                                <h3 className="text-xl font-bold text-gray-800 mb-4">Unit Economics</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">Customer Acquisition Cost (CAC)</span>
+                                        <span className="font-bold text-gray-800">$127</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">Lifetime Value (LTV)</span>
+                                        <span className="font-bold text-gray-800">$2,847</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">LTV/CAC Ratio</span>
+                                        <span className="font-bold text-green-600">22.4x</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">Payback Period</span>
+                                        <span className="font-bold text-gray-800">3.2 months</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 scale-in" style={{animationDelay: '0.8s'}}>
+                                <h3 className="text-xl font-bold text-gray-800 mb-4">Growth Metrics</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">Monthly Recurring Revenue</span>
+                                        <span className="font-bold text-gray-800">$1.2M</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">MRR Growth Rate</span>
+                                        <span className="font-bold text-green-600">18% MoM</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">Net Revenue Retention</span>
+                                        <span className="font-bold text-green-600">127%</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">Gross Revenue Retention</span>
+                                        <span className="font-bold text-green-600">94%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 scale-in" style={{animationDelay: '1s'}}>
+                                <h3 className="text-xl font-bold text-gray-800 mb-4">Profitability Timeline</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">Gross Profit Positive</span>
+                                        <span className="font-bold text-green-600">Already Achieved</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">EBITDA Positive</span>
+                                        <span className="font-bold text-gray-800">Q3 2025</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">Net Income Positive</span>
+                                        <span className="font-bold text-gray-800">Q1 2026</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-800">Cash Flow Positive</span>
+                                        <span className="font-bold text-gray-800">Q4 2025</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const FundingSlide = () => (
+            <div className="gradient-bg-4 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter text-gray-800">Funding Request</h2>
+                        <p className="text-xl text-green-800 slide-enter" style={{animationDelay: '0.2s'}}>
+                            Series A funding to accelerate growth and market expansion
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* Funding Details */}
+                        <div className="space-y-6">
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '0.4s'}}>
+                                <h3 className="text-3xl font-bold text-gray-800 mb-6 text-center">$25M Series A</h3>
+                                <div className="space-y-4">
+                                    <div className="bg-white bg-opacity-30 p-4 rounded-lg">
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-semibold text-gray-800">Valuation</span>
+                                            <span className="text-xl font-bold text-green-600">$125M</span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-white bg-opacity-30 p-4 rounded-lg">
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-semibold text-gray-800">Equity Offered</span>
+                                            <span className="text-xl font-bold text-gray-800">20%</span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-white bg-opacity-30 p-4 rounded-lg">
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-semibold text-gray-800">Use of Funds</span>
+                                            <span className="text-xl font-bold text-blue-600">18 Months</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 scale-in" style={{animationDelay: '0.6s'}}>
+                                <h3 className="text-xl font-bold text-gray-800 mb-4">Previous Funding</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between">
+                                        <span className="text-green-800">Seed Round (2023)</span>
+                                        <span className="font-bold text-gray-800">$3.5M</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-green-800">Pre-Seed (2022)</span>
+                                        <span className="font-bold text-gray-800">$750K</span>
+                                    </div>
+                                    <div className="flex justify-between border-t pt-2">
+                                        <span className="text-green-800 font-semibold">Total Raised</span>
+                                        <span className="font-bold text-gray-800">$4.25M</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Use of Funds */}
+                        <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 scale-in" style={{animationDelay: '0.8s'}}>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-6">Use of Funds</h3>
+                            <div className="space-y-4">
+                                {[
+                                    { category: "Product Development", amount: "$10M", percentage: 40, color: "bg-blue-500" },
+                                    { category: "Sales & Marketing", amount: "$7.5M", percentage: 30, color: "bg-green-500" },
+                                    { category: "Team Expansion", amount: "$5M", percentage: 20, color: "bg-purple-500" },
+                                    { category: "Operations & Infrastructure", amount: "$2.5M", percentage: 10, color: "bg-orange-500" }
+                                ].map((item, index) => (
+                                    <div key={index} className="bg-white bg-opacity-30 p-4 rounded-lg">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="font-semibold text-gray-800">{item.category}</span>
+                                            <span className="font-bold text-gray-800">{item.amount}</span>
+                                        </div>
+                                        <div className="w-full bg-gray-300 rounded-full h-3">
+                                            <div 
+                                                className={`${item.color} h-3 rounded-full progress-bar`}
+                                                style={{'--progress-width': `${item.percentage}%`}}
+                                            ></div>
+                                        </div>
+                                        <div className="text-right text-sm text-gray-700 mt-1">{item.percentage}%</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Milestones */}
+                    <div className="mt-12 bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-8 slide-enter" style={{animationDelay: '1s'}}>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">18-Month Milestones</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="text-center">
+                                <div className="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                                    6M
+                                </div>
+                                <h4 className="font-bold text-gray-800 mb-2">6 Months</h4>
+                                <ul className="text-sm text-green-800 space-y-1">
+                                    <li>• 5,000 schools</li>
+                                    <li>• $5M ARR</li>
+                                    <li>• 75 team members</li>
+                                    <li>• Mobile app launch</li>
+                                </ul>
+                            </div>
+                            <div className="text-center">
+                                <div className="bg-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                                    12M
+                                </div>
+                                <h4 className="font-bold text-gray-800 mb-2">12 Months</h4>
+                                <ul className="text-sm text-green-800 space-y-1">
+                                    <li>• 12,000 schools</li>
+                                    <li>• $15M ARR</li>
+                                    <li>• 120 team members</li>
+                                    <li>• International expansion</li>
+                                </ul>
+                            </div>
+                            <div className="text-center">
+                                <div className="bg-purple-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                                    18M
+                                </div>
+                                <h4 className="font-bold text-gray-800 mb-2">18 Months</h4>
+                                <ul className="text-sm text-green-800 space-y-1">
+                                    <li>• 25,000 schools</li>
+                                    <li>• $35M ARR</li>
+                                    <li>• 180 team members</li>
+                                    <li>• Series B ready</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const RoadmapSlide = () => (
+            <div className="gradient-bg-2 h-full flex items-center justify-center p-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-5xl font-bold mb-6 slide-enter">Product Roadmap</h2>
+                        <p className="text-xl text-pink-100 slide-enter" style={{animationDelay: '0.2s'}}>
+                            Strategic product development timeline
+                        </p>
+                    </div>
+
+                    <div className="space-y-8">
+                        {[
+                            {
+                                quarter: "Q1 2024",
+                                status: "completed",
+                                title: "Core Platform Launch",
+                                features: ["Competency Management", "Assessment Builder", "Basic Analytics", "Web Application"],
+                                color: "bg-green-500"
+                            },
+                            {
+                                quarter: "Q2 2024",
+                                status: "in-progress",
+                                title: "AI & Mobile Features",
+                                features: ["AI Recommendations", "Mobile App", "Offline Support", "Advanced Analytics"],
+                                color: "bg-blue-500"
+                            },
+                            {
+                                quarter: "Q3 2024",
+                                status: "planned",
+                                title: "Enterprise & Integrations",
+                                features: ["LMS Integrations", "SSO", "Advanced Security", "White-labeling"],
+                                color: "bg-purple-500"
+                            },
+                            {
+                                quarter: "Q4 2024",
+                                status: "planned",
+                                title: "Scale & Intelligence",
+                                features: ["Predictive Analytics", "Auto-grading", "Content Marketplace", "API Platform"],
+                                color: "bg-orange-500"
+                            },
+                            {
+                                quarter: "Q1 2025",
+                                status: "future",
+                                title: "Global & Advanced AI",
+                                features: ["Multi-language Support", "Advanced AI Tutoring", "VR/AR Integration", "Blockchain Credentials"],
+                                color: "bg-pink-500"
+                            }
+                        ].map((phase, index) => (
+                            <div 
+                                key={index} 
+                                className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 slide-enter"
+                                style={{animationDelay: `${0.4 + index * 0.1}s`}}
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center space-x-4">
+                                        <div className={`${phase.color} text-white px-4 py-2 rounded-lg font-bold`}>
+                                            {phase.quarter}
+                                        </div>
+                                        <h3 className="text-xl font-bold">{phase.title}</h3>
+                                    </div>
+                                    <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                        phase.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                        phase.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                                        phase.status === 'planned' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-gray-100 text-gray-800'
+                                    }`}>
+                                        {phase.status === 'completed' ? '✓ Completed' :
+                                         phase.status === 'in-progress' ? '⚡ In Progress' :
+                                         phase.status === 'planned' ? '📋 Planned' :
+                                         '🔮 Future'}
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    {phase.features.map((feature, featureIndex) => (
+                                        <div 
+                                            key={featureIndex} 
+                                            className="bg-white bg-opacity-20 p-3 rounded-lg text-center"
+                                        >
+                                            <span className="text-sm font-medium">{feature}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-12 bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 slide-enter" style={{animationDelay: '1s'}}>
+                        <h3 className="text-2xl font-bold mb-6 text-center">Innovation Pipeline</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="text-center">
+                                <Brain className="w-12 h-12 mx-auto mb-4 text-purple-300" />
+                                <h4 className="font-bold mb-2">Advanced AI</h4>
+                                <p className="text-sm text-pink-100">Next-gen machine learning for personalized education</p>
+                            </div>
+                            <div className="text-center">
+                                <Globe className="w-12 h-12 mx-auto mb-4 text-blue-300" />
+                                <h4 className="font-bold mb-2">Global Expansion</h4>
+                                <p className="text-sm text-pink-100">Multi-language support and international markets</p>
+                            </div>
+                            <div className="text-center">
+                                <Rocket className="w-12 h-12 mx-auto mb-4 text-green-300" />
+                                <h4 className="font-bold mb-2">Emerging Tech</h4>
+                                <p className="text-sm text-pink-100">VR/AR, blockchain, and IoT integration</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const ClosingSlide = () => (
+            <div className="gradient-bg-1 h-full flex items-center justify-center relative overflow-hidden">
+                {/* Background Elements */}
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-20 left-20 w-32 h-32 bg-white rounded-full float"></div>
+                    <div className="absolute bottom-20 right-20 w-24 h-24 bg-white rounded-full float" style={{animationDelay: '1s'}}></div>
+                    <div className="absolute top-1/2 right-10 w-16 h-16 bg-white rounded-full float" style={{animationDelay: '2s'}}></div>
+                </div>
+
+                <div className="text-center z-10 max-w-4xl mx-auto px-8">
+                    <div className="scale-in">
+                        <Rocket className="w-24 h-24 mx-auto mb-8 text-white" />
+                    </div>
+                    
+                    <h1 className="text-6xl font-bold mb-6 slide-enter">
+                        <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                            Join the Education Revolution
+                        </span>
+                    </h1>
+                    
+                    <p className="text-2xl mb-8 text-blue-100 slide-enter" style={{animationDelay: '0.3s'}}>
+                        Partner with LearnLink to transform education for millions of students worldwide
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 slide-enter" style={{animationDelay: '0.6s'}}>
+                        <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-6">
+                            <div className="text-3xl font-bold text-yellow-300 mb-2">$404B</div>
+                            <p className="text-blue-100">Market Opportunity</p>
+                        </div>
+                        <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-6">
+                            <div className="text-3xl font-bold text-green-300 mb-2">847K</div>
+                            <p className="text-blue-100">Students Impacted</p>
+                        </div>
+                        <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-6">
+                            <div className="text-3xl font-bold text-pink-300 mb-2">$25M</div>
+                            <p className="text-blue-100">Series A Funding</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6 slide-enter" style={{animationDelay: '0.9s'}}>
+                        <div className="flex flex-col md:flex-row gap-4 justify-center">
+                            <button className="bg-white text-blue-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-50 transition-colors">
+                                Schedule a Demo
+                            </button>
+                            <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-blue-600 transition-colors">
+                                Download Pitch Deck
+                            </button>
+                        </div>
+                        
+                        <div className="flex items-center justify-center space-x-6 text-blue-200">
+                            <div className="flex items-center space-x-2">
+                                <MessageSquare className="w-5 h-5" />
+                                <span>hello@learnlink.com</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Globe className="w-5 h-5" />
+                                <span>www.learnlink.com</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-12 slide-enter" style={{animationDelay: '1.2s'}}>
+                        <p className="text-lg text-blue-200 italic">
+                            "The future of education is personalized, intelligent, and accessible to all."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // Render the main component
+        ReactDOM.render(<PitchDeck />, document.getElementById('root'));
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'986b62a551ed4ebd',t:'MTc1OTE0NzkxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

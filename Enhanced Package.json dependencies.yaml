@@ -1,0 +1,10 @@
+Enhanced Package.json and Dependencies
+Install additional client dependencies:
+
+cd client
+npm install react-dropzone chart.js react-chartjs-2 react-hot-toast date-fns
+
+Install additional server dependencies:
+
+cd server
+npm install sharp jimp @aws-sdk/client-s3 compression helmet rate-limiter-flexible

@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBE Platform - Mobile & Security Enhanced</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="./App.js"></script>
+    <script src="./Advanced Reporting.js"></script>
+    <script src="./aiRecommendationEngine.js"></script>
+    <script src="./AIRecommendations.jsx"></script>
+    <script src="./AnalyticsDashboard.js"></script>
+    <script src="./Assessment.js"></script>
+    <script src="./Assessment.js1.js"></script>
+    <script src="./Authcontext.js"></script>
+    <script src="./Client.env.txt"></script>
+    <script src="./Dashboard.jsx"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        /* PWA Styles */
+        .pwa-install-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        
+        /* Offline Indicator */
+        .offline-indicator {
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .mobile-nav {
+                transform: translateY(100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            
+            .mobile-nav.active {
+                transform: translateY(0);
+            }
+        }
+        
+        /* Security Indicators */
+        .security-badge {
+            background: linear-gradient(45deg, #10b981, #059669);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Biometric Animation */
+        .biometric-scan {
+            animation: biometricPulse 2s infinite;
+        }
+        
+        @keyframes biometricPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Touch Feedback */
+        .touch-feedback:active {
+            transform: scale(0.95);
+            transition: transform 0.1s ease-in-out;
+        }
+        
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, createContext, useContext } = React;
+        const { 
+            Smartphone, Shield, Wifi, WifiOff, Download, Lock, 
+            Fingerprint, Eye, Key, AlertTriangle, CheckCircle,
+            Menu, X, Home, BookOpen, BarChart3, Settings,
+            Bell, User, Camera, Mic, MapPin, Battery
+        } = lucide;
+
+        // Security Context
+        const SecurityContext = createContext();
+
+        // PWA and Offline Context
+        const PWAContext = createContext();
+
+        // Mobile App Component
+        const MobileApp = () => {
+            const [isOnline, setIsOnline] = useState(navigator.onLine);
+            const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+            const [deferredPrompt, setDeferredPrompt] = useState(null);
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [showMobileMenu, setShowMobileMenu] = useState(false);
+            const [biometricSupported, setBiometricSupported] = useState(false);
+            const [securityLevel, setSecurityLevel] = useState('high');
+
+            useEffect(() => {
+                // PWA Install Prompt
+                const handleBeforeInstallPrompt = (e) => {
+                    e.preventDefault();
+                    setDeferredPrompt(e);
+                    setShowInstallPrompt(true);
+                };
+
+                // Online/Offline Detection
+                const handleOnline = () => setIsOnline(true);
+                const handleOffline = () => setIsOnline(false);
+
+                // Biometric Support Detection
+                const checkBiometricSupport = async () => {
+                    if ('credentials' in navigator && 'create' in navigator.credentials) {
+                        try {
+                            const available = await navigator.credentials.create({
+                                publicKey: {
+                                    challenge: new Uint8Array(32),
+                                    rp: { name: "CBE Platform" },
+                                    user: {
+                                        id: new Uint8Array(16),
+                                        name: "test@example.com",
+                                        displayName: "Test User"
+                                    },
+                                    pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                                    authenticatorSelection: {
+                                        authenticatorAttachment: "platform",
+                                        userVerification: "required"
+                                    }
+                                }
+                            });
+                            setBiometricSupported(true);
+                        } catch (error) {
+                            setBiometricSupported(false);
+                        }
+                    }
+                };
+
+                window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+                window.addEventListener('online', handleOnline);
+                window.addEventListener('offline', handleOffline);
+                
+                checkBiometricSupport();
+
+                return () => {
+                    window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+                    window.removeEventListener('online', handleOnline);
+                    window.removeEventListener('offline', handleOffline);
+                };
+            }, []);
+
+            const installPWA = async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        setShowInstallPrompt(false);
+                    }
+                    setDeferredPrompt(null);
+                }
+            };
+
+            return (
+                <SecurityContext.Provider value={{ biometricSupported, securityLevel, setSecurityLevel }}>
+                    <PWAContext.Provider value={{ isOnline, installPWA, showInstallPrompt }}>
+                        <div className="min-h-screen bg-gray-50">
+                            {/* PWA Install Banner */}
+                            {showInstallPrompt && (
+                                <PWAInstallBanner onInstall={installPWA} onDismiss={() => setShowInstallPrompt(false)} />
+                            )}
+
+                            {/* Offline Indicator */}
+                            {!isOnline && <OfflineIndicator />}
+
+                            {/* Mobile Header */}
+                            <MobileHeader 
+                                onMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+                                showMenu={showMobileMenu}
+                            />
+
+                            {/* Main Content */}
+                            <main className="pb-20 pt-16">
+                                {activeTab === 'dashboard' && <MobileDashboard />}
+                                {activeTab === 'assessments' && <MobileAssessments />}
+                                {activeTab === 'analytics' && <MobileAnalytics />}
+                                {activeTab === 'security' && <SecurityCenter />}
+                                {activeTab === 'offline' && <OfflineManager />}
+                            </main>
+
+                            {/* Mobile Navigation */}
+                            <MobileNavigation 
+                                activeTab={activeTab} 
+                                onTabChange={setActiveTab}
+                                isOnline={isOnline}
+                            />
+
+                            {/* Mobile Menu Overlay */}
+                            {showMobileMenu && (
+                                <MobileMenuOverlay onClose={() => setShowMobileMenu(false)} />
+                            )}
+                        </div>
+                    </PWAContext.Provider>
+                </SecurityContext.Provider>
+            );
+        };
+
+        // PWA Install Banner
+        const PWAInstallBanner = ({ onInstall, onDismiss }) => (
+            <div className="pwa-install-banner text-white p-4 flex items-center justify-between">
+                <div className="flex items-center">
+                    <Smartphone className="w-6 h-6 mr-3" />
+                    <div>
+                        <p className="font-semibold">Install CBE App</p>
+                        <p className="text-sm opacity-90">Get the full mobile experience</p>
+                    </div>
+                </div>
+                <div className="flex space-x-2">
+                    <button 
+                        onClick={onInstall}
+                        className="bg-white text-purple-600 px-4 py-2 rounded-lg font-medium touch-feedback"
+                    >
+                        Install
+                    </button>
+                    <button 
+                        onClick={onDismiss}
+                        className="text-white p-2 touch-feedback"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+            </div>
+        );
+
+        // Offline Indicator
+        const OfflineIndicator = () => (
+            <div className="offline-indicator text-white p-2 text-center">
+                <div className="flex items-center justify-center">
+                    <WifiOff className="w-4 h-4 mr-2" />
+                    <span className="text-sm font-medium">You're offline - Some features may be limited</span>
+                </div>
+            </div>
+        );
+
+        // Mobile Header
+        const MobileHeader = ({ onMenuToggle, showMenu }) => {
+            const { isOnline } = useContext(PWAContext);
+            const { securityLevel } = useContext(SecurityContext);
+
+            return (
+                <header className="fixed top-0 left-0 right-0 bg-white shadow-lg z-40 border-b">
+                    <div className="flex items-center justify-between p-4">
+                        <div className="flex items-center">
+                            <button 
+                                onClick={onMenuToggle}
+                                className="p-2 -ml-2 touch-feedback"
+                            >
+                                {showMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                            </button>
+                            <h1 className="text-xl font-bold text-gray-900 ml-2">CBE Platform</h1>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            {/* Security Indicator */}
+                            <div className={`security-badge p-2 rounded-full ${
+                                securityLevel === 'high' ? 'bg-green-500' : 
+                                securityLevel === 'medium' ? 'bg-yellow-500' : 'bg-red-500'
+                            }`}>
+                                <Shield className="w-4 h-4 text-white" />
+                            </div>
+                            
+                            {/* Connection Status */}
+                            <div className={`p-2 rounded-full ${isOnline ? 'bg-green-100' : 'bg-red-100'}`}>
+                                {isOnline ? 
+                                    <Wifi className="w-4 h-4 text-green-600" /> : 
+                                    <WifiOff className="w-4 h-4 text-red-600" />
+                                }
+                            </div>
+                            
+                            {/* Notifications */}
+                            <button className="p-2 touch-feedback">
+                                <Bell className="w-5 h-5 text-gray-600" />
+                            </button>
+                        </div>
+                    </div>
+                </header>
+            );
+        };
+
+        // Mobile Dashboard
+        const MobileDashboard = () => {
+            const [loading, setLoading] = useState(true);
+            const { isOnline } = useContext(PWAContext);
+
+            useEffect(() => {
+                // Simulate loading
+                setTimeout(() => setLoading(false), 1500);
+            }, []);
+
+            if (loading) {
+                return <DashboardSkeleton />;
+            }
+
+            return (
+                <div className="p-4 space-y-6">
+                    {/* Quick Stats */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <StatCard 
+                            title="Competencies"
+                            value="12/15"
+                            subtitle="Mastered"
+                            color="bg-blue-500"
+                            icon={<BookOpen className="w-6 h-6" />}
+                        />
+                        <StatCard 
+                            title="Assessments"
+                            value="8"
+                            subtitle="Pending"
+                            color="bg-purple-500"
+                            icon={<BarChart3 className="w-6 h-6" />}
+                        />
+                    </div>
+
+                    {/* Recent Activity */}
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                        <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+                        <div className="space-y-3">
+                            <ActivityItem 
+                                title="Math Assessment Completed"
+                                time="2 hours ago"
+                                score="92%"
+                                type="success"
+                            />
+                            <ActivityItem 
+                                title="Science Quiz Due Tomorrow"
+                                time="Due in 18 hours"
+                                type="warning"
+                            />
+                            <ActivityItem 
+                                title="English Essay Submitted"
+                                time="Yesterday"
+                                score="88%"
+                                type="success"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Competency Progress */}
+                    <CompetencyProgress />
+
+                    {/* Offline Content */}
+                    {!isOnline && <OfflineContent />}
+                </div>
+            );
+        };
+
+        // Security Center
+        const SecurityCenter = () => {
+            const { biometricSupported, securityLevel, setSecurityLevel } = useContext(SecurityContext);
+            const [biometricEnabled, setBiometricEnabled] = useState(false);
+            const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
+            const [sessionTimeout, setSessionTimeout] = useState(30);
+
+            const handleBiometricSetup = async () => {
+                if (biometricSupported) {
+                    try {
+                        // Simulate biometric setup
+                        setBiometricEnabled(true);
+                        setSecurityLevel('high');
+                        alert('Biometric authentication enabled successfully!');
+                    } catch (error) {
+                        alert('Failed to setup biometric authentication');
+                    }
+                }
+            };
+
+            return (
+                <div className="p-4 space-y-6">
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                        <h2 className="text-xl font-bold mb-6 flex items-center">
+                            <Shield className="w-6 h-6 mr-3 text-blue-600" />
+                            Security Center
+                        </h2>
+
+                        {/* Security Level Indicator */}
+                        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium">Security Level</span>
+                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                    securityLevel === 'high' ? 'bg-green-100 text-green-800' :
+                                    securityLevel === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-red-100 text-red-800'
+                                }`}>
+                                    {securityLevel.toUpperCase()}
+                                </span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                    className={`h-2 rounded-full ${
+                                        securityLevel === 'high' ? 'bg-green-500 w-full' :
+                                        securityLevel === 'medium' ? 'bg-yellow-500 w-2/3' :
+                                        'bg-red-500 w-1/3'
+                                    }`}
+                                ></div>
+                            </div>
+                        </div>
+
+                        {/* Biometric Authentication */}
+                        <div className="space-y-4">
+                            <SecurityOption
+                                icon={<Fingerprint className="w-6 h-6" />}
+                                title="Biometric Authentication"
+                                description="Use fingerprint or face recognition"
+                                enabled={biometricEnabled}
+                                supported={biometricSupported}
+                                onToggle={handleBiometricSetup}
+                            />
+
+                            <SecurityOption
+                                icon={<Key className="w-6 h-6" />}
+                                title="Two-Factor Authentication"
+                                description="Extra security with SMS or authenticator app"
+                                enabled={twoFactorEnabled}
+                                supported={true}
+                                onToggle={() => setTwoFactorEnabled(!twoFactorEnabled)}
+                            />
+
+                            <SecurityOption
+                                icon={<Eye className="w-6 h-6" />}
+                                title="Privacy Mode"
+                                description="Hide sensitive information in app switcher"
+                                enabled={false}
+                                supported={true}
+                                onToggle={() => {}}
+                            />
+                        </div>
+
+                        {/* Session Settings */}
+                        <div className="mt-6 p-4 border border-gray-200 rounded-lg">
+                            <h4 className="font-medium mb-3">Session Settings</h4>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Auto-logout after inactivity
+                                    </label>
+                                    <select 
+                                        value={sessionTimeout}
+                                        onChange={(e) => setSessionTimeout(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                    >
+                                        <option value={15}>15 minutes</option>
+                                        <option value={30}>30 minutes</option>
+                                        <option value={60}>1 hour</option>
+                                        <option value={120}>2 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Security Audit */}
+                        <SecurityAudit />
+                    </div>
+                </div>
+            );
+        };
+
+        // Offline Manager
+        const OfflineManager = () => {
+            const [offlineContent, setOfflineContent] = useState([]);
+            const [downloadProgress, setDownloadProgress] = useState({});
+            const [storageUsed, setStorageUsed] = useState(0);
+            const [storageLimit] = useState(100); // MB
+
+            useEffect(() => {
+                loadOfflineContent();
+                checkStorageUsage();
+            }, []);
+
+            const loadOfflineContent = () => {
+                // Simulate loading offline content
+                setOfflineContent([
+                    { id: 1, title: 'Math Fundamentals', type: 'course', size: 15, downloaded: true },
+                    { id: 2, title: 'Science Lab Manual', type: 'resource', size: 8, downloaded: true },
+                    { id: 3, title: 'History Timeline', type: 'resource', size: 12, downloaded: false },
+                    { id: 4, title: 'English Grammar Guide', type: 'course', size: 20, downloaded: false }
+                ]);
+            };
+
+            const checkStorageUsage = () => {
+                // Calculate storage usage
+                const used = offlineContent
+                    .filter(item => item.downloaded)
+                    .reduce((total, item) => total + item.size, 0);
+                setStorageUsed(used);
+            };
+
+            const downloadContent = async (contentId) => {
+                setDownloadProgress(prev => ({ ...prev, [contentId]: 0 }));
+                
+                // Simulate download progress
+                for (let i = 0; i <= 100; i += 10) {
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    setDownloadProgress(prev => ({ ...prev, [contentId]: i }));
+                }
+                
+                // Mark as downloaded
+                setOfflineContent(prev => 
+                    prev.map(item => 
+                        item.id === contentId ? { ...item, downloaded: true } : item
+                    )
+                );
+                
+                setDownloadProgress(prev => {
+                    const newProgress = { ...prev };
+                    delete newProgress[contentId];
+                    return newProgress;
+                });
+                
+                checkStorageUsage();
+            };
+
+            return (
+                <div className="p-4 space-y-6">
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                        <h2 className="text-xl font-bold mb-6 flex items-center">
+                            <Download className="w-6 h-6 mr-3 text-blue-600" />
+                            Offline Content
+                        </h2>
+
+                        {/* Storage Usage */}
+                        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="font-medium">Storage Used</span>
+                                <span className="text-sm text-gray-600">{storageUsed}MB / {storageLimit}MB</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                    className="bg-blue-500 h-2 rounded-full"
+                                    style={{ width: `${(storageUsed / storageLimit) * 100}%` }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        {/* Content List */}
+                        <div className="space-y-3">
+                            {offlineContent.map(item => (
+                                <OfflineContentItem
+                                    key={item.id}
+                                    item={item}
+                                    progress={downloadProgress[item.id]}
+                                    onDownload={() => downloadContent(item.id)}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Offline Settings */}
+                        <div className="mt-6 p-4 border border-gray-200 rounded-lg">
+                            <h4 className="font-medium mb-3">Offline Settings</h4>
+                            <div className="space-y-3">
+                                <label className="flex items-center">
+                                    <input type="checkbox" className="mr-3" defaultChecked />
+                                    <span className="text-sm">Auto-download new assessments</span>
+                                </label>
+                                <label className="flex items-center">
+                                    <input type="checkbox" className="mr-3" />
+                                    <span className="text-sm">Download only on WiFi</span>
+                                </label>
+                                <label className="flex items-center">
+                                    <input type="checkbox" className="mr-3" defaultChecked />
+                                    <span className="text-sm">Sync when online</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Mobile Navigation
+        const MobileNavigation = ({ activeTab, onTabChange, isOnline }) => {
+            const navItems = [
+                { id: 'dashboard', label: 'Dashboard', icon: Home },
+                { id: 'assessments', label: 'Assessments', icon: BookOpen },
+                { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+                { id: 'security', label: 'Security', icon: Shield },
+                { id: 'offline', label: 'Offline', icon: Download }
+            ];
+
+            return (
+                <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
+                    <div className="flex">
+                        {navItems.map(item => {
+                            const Icon = item.icon;
+                            const isActive = activeTab === item.id;
+                            
+                            return (
+                                <button
+                                    key={item.id}
+                                    onClick={() => onTabChange(item.id)}
+                                    className={`flex-1 py-3 px-2 text-center touch-feedback ${
+                                        isActive ? 'text-blue-600' : 'text-gray-600'
+                                    }`}
+                                >
+                                    <Icon className={`w-5 h-5 mx-auto mb-1 ${
+                                        isActive ? 'text-blue-600' : 'text-gray-400'
+                                    }`} />
+                                    <span className="text-xs font-medium">{item.label}</span>
+                                    {item.id === 'offline' && !isOnline && (
+                                        <div className="w-2 h-2 bg-red-500 rounded-full absolute top-2 right-1/2 transform translate-x-1/2"></div>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </nav>
+            );
+        };
+
+        // Helper Components
+        const StatCard = ({ title, value, subtitle, color, icon }) => (
+            <div className="bg-white rounded-xl shadow-lg p-4">
+                <div className={`${color} text-white p-3 rounded-lg mb-3 w-fit`}>
+                    {icon}
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">{value}</h3>
+                <p className="text-sm text-gray-600">{title}</p>
+                <p className="text-xs text-gray-500">{subtitle}</p>
+            </div>
+        );
+
+        const ActivityItem = ({ title, time, score, type }) => (
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center">
+                    <div className={`w-3 h-3 rounded-full mr-3 ${
+                        type === 'success' ? 'bg-green-500' : 
+                        type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+                    }`}></div>
+                    <div>
+                        <p className="font-medium text-gray-900 text-sm">{title}</p>
+                        <p className="text-xs text-gray-500">{time}</p>
+                    </div>
+                </div>
+                {score && (
+                    <span className="text-sm font-medium text-green-600">{score}</span>
+                )}
+            </div>
+        );
+
+        const SecurityOption = ({ icon, title, description, enabled, supported, onToggle }) => (
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center">
+                    <div className={`p-2 rounded-lg mr-4 ${
+                        enabled ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                    }`}>
+                        {icon}
+                    </div>
+                    <div>
+                        <h4 className="font-medium text-gray-900">{title}</h4>
+                        <p className="text-sm text-gray-600">{description}</p>
+                        {!supported && (
+                            <p className="text-xs text-red-500">Not supported on this device</p>
+                        )}
+                    </div>
+                </div>
+                <button
+                    onClick={onToggle}
+                    disabled={!supported}
+                    className={`w-12 h-6 rounded-full transition-colors ${
+                        enabled ? 'bg-green-500' : 'bg-gray-300'
+                    } ${!supported ? 'opacity-50' : ''}`}
+                >
+                    <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${
+                        enabled ? 'translate-x-6' : 'translate-x-0.5'
+                    }`}></div>
+                </button>
+            </div>
+        );
+
+        const SecurityAudit = () => (
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-medium text-blue-900 mb-3 flex items-center">
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Security Audit
+                </h4>
+                <div className="space-y-2 text-sm">
+                    <div className="flex items-center text-green-700">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Strong password policy enabled
+                    </div>
+                    <div className="flex items-center text-green-700">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Two-factor authentication active
+                    </div>
+                    <div className="flex items-center text-yellow-700">
+                        <AlertTriangle className="w-4 h-4 mr-2" />
+                        Last security update: 2 days ago
+                    </div>
+                </div>
+            </div>
+        );
+
+        const OfflineContentItem = ({ item, progress, onDownload }) => (
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center">
+                    <div className={`p-2 rounded-lg mr-4 ${
+                        item.downloaded ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                    }`}>
+                        <BookOpen className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <h4 className="font-medium text-gray-900">{item.title}</h4>
+                        <p className="text-sm text-gray-600">{item.type} • {item.size}MB</p>
+                        {progress !== undefined && (
+                            <div className="w-32 bg-gray-200 rounded-full h-1 mt-1">
+                                <div 
+                                    className="bg-blue-500 h-1 rounded-full transition-all"
+                                    style={{ width: `${progress}%` }}
+                                ></div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                {!item.downloaded && progress === undefined && (
+                    <button
+                        onClick={onDownload}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm touch-feedback"
+                    >
+                        Download
+                    </button>
+                )}
+                {item.downloaded && (
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                )}
+            </div>
+        );
+
+        const CompetencyProgress = () => (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-lg font-semibold mb-4">Competency Progress</h3>
+                <div className="space-y-4">
+                    {[
+                        { name: 'Problem Solving', level: 3, progress: 75 },
+                        { name: 'Critical Thinking', level: 2, progress: 60 },
+                        { name: 'Communication', level: 4, progress: 90 },
+                        { name: 'Collaboration', level: 2, progress: 45 }
+                    ].map((competency, index) => (
+                        <div key={index}>
+                            <div className="flex justify-between mb-2">
+                                <span className="text-sm font-medium text-gray-700">{competency.name}</span>
+                                <span className="text-sm text-gray-500">Level {competency.level}</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                    className="bg-blue-500 h-2 rounded-full transition-all"
+                                    style={{ width: `${competency.progress}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const OfflineContent = () => (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                <div className="flex items-center mb-2">
+                    <WifiOff className="w-5 h-5 text-yellow-600 mr-2" />
+                    <h4 className="font-medium text-yellow-800">Offline Mode</h4>
+                </div>
+                <p className="text-sm text-yellow-700 mb-3">
+                    You can still access downloaded content and complete offline assessments.
+                </p>
+                <button className="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm touch-feedback">
+                    View Offline Content
+                </button>
+            </div>
+        );
+
+        const DashboardSkeleton = () => (
+            <div className="p-4 space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                    {[...Array(2)].map((_, i) => (
+                        <div key={i} className="bg-white rounded-xl shadow-lg p-4">
+                            <div className="skeleton w-12 h-12 rounded-lg mb-3"></div>
+                            <div className="skeleton w-16 h-6 rounded mb-2"></div>
+                            <div className="skeleton w-20 h-4 rounded"></div>
+                        </div>
+                    ))}
+                </div>
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <div className="skeleton w-32 h-6 rounded mb-4"></div>
+                    <div className="space-y-3">
+                        {[...Array(3)].map((_, i) => (
+                            <div key={i} className="skeleton w-full h-16 rounded-lg"></div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+
+        const MobileAssessments = () => (
+            <div className="p-4">
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h2 className="text-xl font-bold mb-4">Mobile Assessments</h2>
+                    <p className="text-gray-600">Assessment interface optimized for mobile devices with touch interactions and offline support.</p>
+                </div>
+            </div>
+        );
+
+        const MobileAnalytics = () => (
+            <div className="p-4">
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h2 className="text-xl font-bold mb-4">Mobile Analytics</h2>
+                    <p className="text-gray-600">Touch-friendly charts and analytics designed for mobile viewing.</p>
+                </div>
+            </div>
+        );
+
+        const MobileMenuOverlay = ({ onClose }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50" onClick={onClose}>
+                <div className="bg-white w-80 h-full p-6" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold">Menu</h3>
+                        <button onClick={onClose} className="p-2 touch-feedback">
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <nav className="space-y-2">
+                        {[
+                            { label: 'Profile', icon: User },
+                            { label: 'Settings', icon: Settings },
+                            { label: 'Help & Support', icon: AlertTriangle },
+                            { label: 'Privacy Policy', icon: Shield },
+                            { label: 'Logout', icon: Lock }
+                        ].map((item, index) => {
+                            const Icon = item.icon;
+                            return (
+                                <button
+                                    key={index}
+                                    className="w-full flex items-center p-3 text-left hover:bg-gray-50 rounded-lg touch-feedback"
+                                >
+                                    <Icon className="w-5 h-5 mr-3 text-gray-400" />
+                                    <span className="text-gray-700">{item.label}</span>
+                                </button>
+                            );
+                        })}
+                    </nav>
+                </div>
+            </div>
+        );
+
+        // Render the app
+        ReactDOM.render(<MobileApp />, document.getElementById('root'));
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CBE Platform">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'986a173d16ea8a59',t:'MTc1OTEzNDMzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
